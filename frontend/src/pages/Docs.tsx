@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const CodeBlock = ({ code, lang = 'bash', id }: { code: string; lang?: string; id: string }) => {
+const CodeBlock = ({ code, lang = 'bash' }: { code: string; lang?: string }) => {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(code);
@@ -69,7 +69,7 @@ const EndpointRow = ({ method, path, desc, auth, body }: {
       {open && (
         <div className="px-5 pb-5 border-t border-glass-border pt-4 space-y-4">
           <p className="text-sm text-text-secondary">{desc}</p>
-          {body && <CodeBlock id={`ep-${path}`} lang={body.trim().startsWith('{') ? 'json' : 'bash'} code={body} />}
+          {body && <CodeBlock lang={body.trim().startsWith('{') ? 'json' : 'bash'} code={body} />}
         </div>
       )}
     </div>
@@ -251,7 +251,7 @@ export default function Docs() {
                 ))}
               </div>
 
-              <CodeBlock id="install" lang="bash" code={`# Python 3.14 on Windows — install numpy via conda first
+              <CodeBlock lang="bash" code={`# Python 3.14 on Windows — install numpy via conda first
 conda install numpy -y
 
 # Install remaining dependencies (binary wheels only)
@@ -263,7 +263,7 @@ pip install -r requirements.txt --only-binary=:all:`} />
                 numpy, pydantic, and bcrypt have no pre-built wheels for Py3.14. Always install numpy via conda first, then use <code className="text-accent">--only-binary=:all:</code> for the rest. Plain <code className="text-accent">pip install -r requirements.txt</code> will fail to compile.
               </div>
 
-              <CodeBlock id="run" lang="bash" code={`# Verify MongoDB is running
+              <CodeBlock lang="bash" code={`# Verify MongoDB is running
 mongosh --eval "db.adminCommand('ping')"
 
 # Start the server
@@ -281,7 +281,7 @@ curl http://localhost:8000/health
               {authEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
             </div>
 
-            <CodeBlock id="auth-flow" lang="bash" code={`# Register and get a token
+            <CodeBlock lang="bash" code={`# Register and get a token
 curl -X POST http://localhost:8000/api/v1/users/register \\
   -H "Content-Type: application/json" \\
   -d '{"email":"you@co.com","username":"you","password":"Testpass123"}'
@@ -340,7 +340,7 @@ curl -H "Authorization: Bearer eyJ..." \\
 
             <div className="p-5 rounded-xl bg-white/[0.02] border border-glass-border">
               <p className="text-xs font-semibold text-text-primary mb-3">RootCause response shape</p>
-              <CodeBlock id="rootcause" lang="json" code={`{
+              <CodeBlock lang="json" code={`{
   "one_line_summary": "Column user_id in raw.users was renamed to customer_id",
   "detailed_explanation": "...",
   "break_point_fqn": "raw.users",
@@ -390,7 +390,7 @@ curl -H "Authorization: Bearer eyJ..." \\
                 ))}
               </div>
 
-              <CodeBlock id="github-setup" lang="bash" code={`# 1. Expose local server via ngrok
+              <CodeBlock lang="bash" code={`# 1. Expose local server via ngrok
 ngrok http 8000
 # -> https://XXXX.ngrok-free.app
 
@@ -427,7 +427,7 @@ ngrok http 8000
 
           {/* Configuration */}
           <Section id="configuration" icon={Shield} title="Configuration" subtitle="All settings via server/.env">
-            <CodeBlock id="env" lang="env" code={`# DATABASE
+            <CodeBlock lang="env" code={`# DATABASE
 # Must be rag_database — controllers hardcode this name
 MONGO_URI=mongodb://localhost:27017/rag_database
 

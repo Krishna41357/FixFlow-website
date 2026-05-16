@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, GitPullRequest, Database, Zap, Search, Terminal, Shield, ChevronRight, CheckCircle2 } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
-import { motion, AnimatePresence, cubicBezier } from 'framer-motion';
+import { motion, AnimatePresence, cubicBezier, type Variants } from 'framer-motion';
 import CardSwap, { Card } from '../components/CardSwap';
 
 const features = [
@@ -65,7 +65,7 @@ const integrations = [
 
 function FeaturesBlock() {
   const [activeIdx, setActiveIdx] = useState(0);
-  const intervalRef = useRef(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const DELAY = 3000;
 
   const advance = useCallback(() => {
@@ -73,13 +73,19 @@ function FeaturesBlock() {
   }, []);
 
   const resetInterval = useCallback(() => {
-    clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     intervalRef.current = setInterval(advance, DELAY);
   }, [advance]);
 
   useEffect(() => {
     intervalRef.current = setInterval(advance, DELAY);
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [advance]);
 
   const active = features[activeIdx];
@@ -98,7 +104,7 @@ function FeaturesBlock() {
             pauseOnHover
             skewAmount={3}
             easing="elastic"
-            onCardClick={(idx) => {
+            onCardClick={(idx: number) => {
               setActiveIdx(idx % features.length);
               resetInterval();
             }}
@@ -206,13 +212,21 @@ function FeaturesBlock() {
 }
 
 export default function Home() {
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.15, delayChildren: 0.1 } 
+    }
   };
-  const item = {
+  
+  const item: Variants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: cubicBezier(0.16, 1, 0.3, 1) } }
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.7, ease: cubicBezier(0.16, 1, 0.3, 1) } 
+    }
   };
 
   return (
