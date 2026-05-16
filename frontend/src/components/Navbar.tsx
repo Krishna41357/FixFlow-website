@@ -70,7 +70,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
           >
             {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
           </button>
-          <Link to="/docs" className="btn-primary text-sm">
+          <Link to="/early-access" className="btn-primary text-sm">
             Get Early Access
           </Link>
         </div>
