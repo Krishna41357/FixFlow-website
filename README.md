@@ -1,25 +1,29 @@
-# FixFlow Website
+# FixFlow
 
-FixFlow is a modern web application built with React, TypeScript, and Vite. This repository contains both the frontend and will include backend services in the future.
+**Automate Your Workflow Effortlessly**
 
-## 📁 Project Structure
+FixFlow is an intelligent automation platform that streamlines your workflows and integrates seamlessly with your existing tools. Say goodbye to repetitive tasks and hello to productivity.
 
-```
-FixFlow-website/
-├── frontend/                 # React + TypeScript + Vite application
-│   ├── src/
-│   │   ├── components/      # Reusable React components
-│   │   ├── pages/           # Page components
-│   │   ├── assets/          # Static assets
-│   │   ├── App.tsx          # Main application component
-│   │   └── main.tsx         # Application entry point
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   └── README.md            # Frontend-specific documentation
-├── backend/                 # (Coming Soon) Backend API
-└── README.md               # This file
-```
+## 💡 What is FixFlow?
+
+FixFlow is a powerful bot-driven automation solution designed to help you automate routine tasks, integrate multiple services, and optimize your workflow. Whether you're managing projects, handling data, or coordinating team activities, FixFlow adapts to your needs and works the way you do.
+
+## ✨ Why FixFlow?
+
+### Time-Saving Automation
+Eliminate repetitive manual tasks and let FixFlow handle the heavy lifting. Automate workflows with simple, intuitive configurations.
+
+### Seamless Integrations
+Connect FixFlow with your favorite tools and services. Whether it's email, project management, CRM, or custom APIs—FixFlow integrates it all.
+
+### Easy to Use
+No coding required. Our intuitive interface makes it easy to set up complex automations in minutes.
+
+### Flexible & Scalable
+Start small and scale up. FixFlow grows with your needs, whether you're a solo entrepreneur or an enterprise.
+
+### Reliable Performance
+Built for reliability with robust infrastructure ensuring your automations run smoothly 24/7.
 
 ## 🚀 Getting Started
 
@@ -28,7 +32,7 @@ FixFlow-website/
 - Node.js 16.x or higher
 - npm or yarn
 
-### Frontend Setup
+### Installation & Setup
 
 1. Navigate to the frontend directory:
    ```bash
@@ -47,84 +51,12 @@ FixFlow-website/
 
 4. Open your browser and navigate to `http://localhost:5173`
 
-### Available Scripts
+## 📖 Learn More
 
-From the `frontend` directory:
-
-- **`npm run dev`** - Start development server with hot module replacement (HMR)
-- **`npm run build`** - Build for production
-- **`npm run preview`** - Preview production build locally
-- **`npm run lint`** - Run ESLint to check code quality
-
-## 📚 Features
-
-### Current Pages
-
-- **Home** - Landing page
-- **Bot Explanation** - Details about FixFlow bot
-- **Integrations** - Integration options and setup
-- **Walkthrough** - User walkthrough guide
-- **Docs** - Documentation
-
-### Components
-
-- **Navbar** - Navigation header
-- **Footer** - Footer section
-- **CardSwap** - Card component with swap functionality
-- Social icons (GitHub, LinkedIn, Twitter)
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-- **React 18** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **ESLint** - Code quality and linting
-
-## 📝 Development Workflow
-
-1. Create a new branch for your feature:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make your changes and commit:
-   ```bash
-   git commit -m "Add feature description"
-   ```
-
-3. Push your changes:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-4. Open a pull request on GitHub
-
-## 🔄 Backend (Coming Soon)
-
-The backend services will be added in a separate `backend` directory. This will include:
-
-- API endpoints for FixFlow services
-- Database integration
-- Authentication and authorization
-- Business logic
-
-More information will be added as the backend is developed.
-
-## 📦 Deployment
-
-### Frontend Deployment
-
-The frontend can be deployed to various platforms:
-
-- **Vercel** (recommended for Vite + React)
-- **Netlify**
-- **GitHub Pages**
-- **Docker**
-
-See the [frontend README](./frontend/README.md) for specific deployment instructions.
+- **[Bot Explanation](http://localhost:5173/bot-explanation)** - Understand how FixFlow works
+- **[Integrations](http://localhost:5173/integrations)** - Explore available integrations
+- **[Walkthrough](http://localhost:5173/walkthrough)** - Step-by-step guide to get started
+- **[Documentation](http://localhost:5173/docs)** - Complete documentation
 
 ## 🤝 Contributing
 
