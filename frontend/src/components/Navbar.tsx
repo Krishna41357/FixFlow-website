@@ -113,7 +113,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               </Link>
             ))}
             <Link
-              to="/docs"
+              to="/early-access"
               onClick={() => setMobileMenuOpen(false)}
               className="block btn-primary text-center text-sm mt-4"
             >
