@@ -110,13 +110,19 @@ function FeaturesBlock() {
   }, []);
 
   const resetInterval = useCallback(() => {
-    clearInterval(intervalRef.current as NodeJS.Timeout);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     intervalRef.current = setInterval(advance, DELAY);
   }, [advance]);
 
   useEffect(() => {
     intervalRef.current = setInterval(advance, DELAY);
-    return () => clearInterval(intervalRef.current as NodeJS.Timeout);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [advance]);
 
   const active = features[activeIdx];
