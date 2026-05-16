@@ -7,6 +7,7 @@ import BotExplanation from './pages/BotExplanation';
 import Walkthrough from './pages/Walkthrough';
 import Docs from './pages/Docs';
 import Integrations from './pages/Integrations';
+import EarlyAccess from './pages/EarlyAccess';
 
 function App() {
   const [isDark, setIsDark] = useState(true);
@@ -42,6 +43,7 @@ function App() {
           <Route path="/walkthrough" element={<Walkthrough />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/integrations" element={<Integrations />} />
+          <Route path="/early-access" element={<EarlyAccess />} />
         </Routes>
       </main>
       <Footer />
