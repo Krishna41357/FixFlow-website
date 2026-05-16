@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, GitPullRequest, Database, Zap, Search, Terminal, Shield, ChevronRight, CheckCircle2 } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, cubicBezier } from 'framer-motion';
 import CardSwap, { Card } from '../components/CardSwap';
 
 const features = [
@@ -170,7 +170,7 @@ function FeaturesBlock() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: cubicBezier(0.16, 1, 0.3, 1) }}
             className="flex flex-col items-center lg:items-start"
           >
             <span
@@ -212,7 +212,7 @@ export default function Home() {
   };
   const item = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: cubicBezier(0.16, 1, 0.3, 1) } }
   };
 
   return (
