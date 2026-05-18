@@ -24,6 +24,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     { name: 'Engine', path: '/walkthrough' },
     { name: 'Docs', path: '/docs' },
     { name: 'Integrations', path: '/integrations' },
+    { name: 'Pricing', path: '/pricing' },
   ];
 
   return (

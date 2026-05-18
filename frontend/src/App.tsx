@@ -8,6 +8,7 @@ import Walkthrough from './pages/Walkthrough';
 import Docs from './pages/Docs';
 import Integrations from './pages/Integrations';
 import EarlyAccess from './pages/EarlyAccess';
+import Pricing from './pages/Pricing';
 
 function App() {
   const [isDark, setIsDark] = useState(true);
@@ -39,10 +40,12 @@ function App() {
       <main className="flex-1 w-full relative">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/Home" element={<Home />} />
           <Route path="/bot" element={<BotExplanation />} />
           <Route path="/walkthrough" element={<Walkthrough />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/integrations" element={<Integrations />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/early-access" element={<EarlyAccess />} />
         </Routes>
       </main>
