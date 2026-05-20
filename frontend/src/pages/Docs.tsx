@@ -1,206 +1,137 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import {
-  BookOpen, Terminal, Code, ArrowRight, Copy,
-  Shield, Server, MessageSquare, ChevronDown, ChevronRight, GitBranch
+  ArrowRight, CheckCircle, AlertCircle, Zap,
+  GitBranch, MessageSquare, Cloud, LogIn,
+  HelpCircle, ChevronRight, Database
 } from 'lucide-react';
-import { useState } from 'react';
 
-const CodeBlock = ({ code, lang = 'bash' }: { code: string; lang?: string }) => {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+// ── Shared primitives ─────────────────────────────────────────────────────────
+
+const Callout = ({ icon: Icon, color = 'green', title, children }: { icon: any; color?: 'green' | 'yellow' | 'blue'; title?: string; children: React.ReactNode }) => {
+  const colors: Record<'green' | 'yellow' | 'blue', { bg: string; border: string; icon: string }> = {
+    green:  { bg: 'bg-emerald-500/8',  border: 'border-emerald-500/20', icon: 'text-emerald-400' },
+    yellow: { bg: 'bg-amber-500/8',    border: 'border-amber-500/20',   icon: 'text-amber-400'   },
+    blue:   { bg: 'bg-blue-500/8',     border: 'border-blue-500/20',    icon: 'text-blue-400'    },
   };
+  const c = colors[color as 'green' | 'yellow' | 'blue'];
   return (
-    <div className="rounded-xl overflow-hidden border border-glass-border">
-      <div className="flex items-center justify-between px-4 py-2 bg-white/[0.02] border-b border-glass-border">
-        <span className="text-xs font-mono text-text-muted">{lang}</span>
-        <button onClick={copy} className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary transition-colors">
-          <Copy className="w-3.5 h-3.5" />
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
+    <div className={`p-5 rounded-xl border ${c.bg} ${c.border}`}>
+      <div className="flex gap-3">
+        <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${c.icon}`} />
+        <div className="text-sm">
+          {title && <p className="font-semibold text-text-primary mb-1">{title}</p>}
+          <div className="text-text-muted leading-relaxed">{children}</div>
+        </div>
       </div>
-      <pre className="p-5 bg-bg-tertiary font-mono text-sm leading-relaxed overflow-x-auto text-text-primary whitespace-pre">{code}</pre>
     </div>
   );
 };
 
-const Section = ({ id, icon: Icon, title, subtitle, children }: {
-  id: string; icon: any; title: string; subtitle: string; children: React.ReactNode;
-}) => (
-  <div id={id} className="border-b border-glass-border">
-    <div className="px-8 sm:px-16 py-14">
-      <div className="flex items-start gap-4 mb-8">
-        <div className="w-9 h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <Icon className="w-4 h-4 text-accent" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold">{title}</h2>
-          <p className="text-text-muted text-sm mt-1">{subtitle}</p>
-        </div>
-      </div>
-      {children}
+const Step = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
+  <div className="flex gap-4">
+    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent/15 border border-accent/25 flex items-center justify-center">
+      <span className="text-accent text-xs font-bold">{n}</span>
+    </div>
+    <div className="pb-6 border-b border-glass-border/50 flex-1 last:border-0 last:pb-0">
+      <p className="font-semibold text-text-primary text-sm mb-2">{title}</p>
+      <div className="text-sm text-text-secondary leading-relaxed space-y-1">{children}</div>
     </div>
   </div>
 );
 
-const EndpointRow = ({ method, path, desc, auth, body }: {
-  method: string; path: string; desc: string; auth: boolean; body: string | null;
-}) => {
-  const [open, setOpen] = useState(false);
-  const methodColors: Record<string, string> = {
-    GET: 'text-purple-400 bg-purple-400/10',
-    POST: 'text-green-400 bg-green-400/10',
-    PUT: 'text-yellow-400 bg-yellow-400/10',
-    DELETE: 'text-red-400 bg-red-400/10',
-  };
-  return (
-    <div className="border border-glass-border rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors text-left"
-      >
-        <span className={`px-2.5 py-0.5 rounded font-mono text-xs font-bold flex-shrink-0 ${methodColors[method]}`}>{method}</span>
-        <code className="font-mono text-sm text-text-primary flex-1">{path}</code>
-        {auth && <span className="text-xs text-text-muted border border-glass-border px-2 py-0.5 rounded flex-shrink-0">Bearer</span>}
-        {open ? <ChevronDown className="w-4 h-4 text-text-muted flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0" />}
-      </button>
-      {open && (
-        <div className="px-5 pb-5 border-t border-glass-border pt-4 space-y-4">
-          <p className="text-sm text-text-secondary">{desc}</p>
-          {body && <CodeBlock lang={body.trim().startsWith('{') ? 'json' : 'bash'} code={body} />}
-        </div>
-      )}
+const Screenshot = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="rounded-xl overflow-hidden border border-glass-border">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] border-b border-glass-border">
+      <div className="flex gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
+        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
+        <div className="w-2.5 h-2.5 rounded-full bg-green-500/40" />
+      </div>
+      <span className="text-xs text-text-muted font-mono ml-2">{label}</span>
     </div>
-  );
-};
+    <div className="p-5 bg-bg-tertiary text-sm">{children}</div>
+  </div>
+);
 
-export default function Docs() {
-  const navItems = ['Installation', 'Authentication', 'Webhooks', 'Investigations', 'Chat', 'GitHub Bot', 'Configuration'];
+const Tag = ({ children }: { children: React.ReactNode }) => (
+  <span className="inline-block text-xs font-medium text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-md">
+    {children}
+  </span>
+);
 
-  const authEndpoints = [
-    {
-      method: 'POST', path: '/api/v1/users/register', auth: false,
-      desc: 'Create a new user account. Returns a JWT access token immediately.',
-      body: `{\n  "email": "user@example.com",\n  "username": "myuser",\n  "password": "Testpass123",\n  "full_name": "Optional Name"\n}`,
-    },
-    {
-      method: 'POST', path: '/api/v1/users/login', auth: false,
-      desc: 'Authenticate via query parameters (not request body). Returns a JWT access token.',
-      body: `POST /api/v1/users/login?email=user@example.com&password=Testpass123`,
-    },
-    {
-      method: 'GET', path: '/api/v1/users/me', auth: true,
-      desc: "Returns the currently authenticated user's profile.",
-      body: null,
-    },
-  ];
+const Section = ({ id, icon: Icon, title, subtitle, children }: { id: string; icon: any; title: string; subtitle: string; children: React.ReactNode }) => (
+  <div id={id} className="border-b border-glass-border">
+    <div className="px-8 sm:px-16 py-14">
+      <div className="flex items-start gap-4 mb-10">
+        <div className="w-9 h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Icon className="w-4 h-4 text-accent" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
+          <p className="text-text-muted text-sm mt-1">{subtitle}</p>
+        </div>
+      </div>
+      <div className="space-y-6 max-w-2xl">{children}</div>
+    </div>
+  </div>
+);
 
-  const connectionEndpoints = [
-    {
-      method: 'POST', path: '/api/v1/connections', auth: true,
-      desc: 'Save an OpenMetadata workspace connection. The server will ping your OpenMetadata instance to verify the token before saving.',
-      body: `{\n  "workspace_name": "Production",\n  "openmetadata_url": "https://metadata.company.com",\n  "openmetadata_token": "eyJ...",\n  "github_repo": "owner/repo"\n}`,
-    },
-    {
-      method: 'GET', path: '/api/v1/connections', auth: true,
-      desc: 'List all connections for the authenticated user. Tokens are masked in responses.',
-      body: null,
-    },
-    {
-      method: 'DELETE', path: '/api/v1/connections/{id}', auth: true,
-      desc: 'Soft-delete a connection. Orphaned investigations are marked accordingly.',
-      body: null,
-    },
-  ];
+// ── Nav items ─────────────────────────────────────────────────────────────────
 
-  const webhookEndpoints = [
-    {
-      method: 'POST', path: '/api/v1/events/dbt-webhook', auth: false,
-      desc: 'Trigger an investigation from a dbt Cloud run failure. Pass connection_id and user_id as query params. Returns 202 immediately — investigation runs in background.',
-      body: `POST /api/v1/events/dbt-webhook?connection_id=X&user_id=Y\n\n{\n  "data": {\n    "run_id": "abc123",\n    "node_id": "model.proj.orders",\n    "error_message": "Relation does not exist",\n    "status": "error"\n  }\n}`,
-    },
-    {
-      method: 'POST', path: '/api/v1/github/webhook', auth: false,
-      desc: 'Receive GitHub PR events. Validates X-Hub-Signature-256 HMAC, parses .sql/.yml diffs, runs investigation, and posts a comment on the PR.',
-      body: `POST /api/v1/github/webhook?connection_id=X&user_id=Y\nHeaders: X-Hub-Signature-256: sha256=<hmac>`,
-    },
-    {
-      method: 'POST', path: '/api/v1/events/manual-query', auth: true,
-      desc: 'Manually trigger an investigation from your own tooling.',
-      body: `{\n  "connection_id": "507f1f77bcf86cd799439011",\n  "asset_fqn": "snowflake.prod.orders",\n  "failure_query": "Why are values NULL?"\n}`,
-    },
-  ];
+const NAV = [
+  { label: 'Overview',              id: 'overview'            },
+  { label: 'Create your account',   id: 'create-account'      },
+  { label: 'Connect OpenMetadata',  id: 'connect-openmetadata'},
+  { label: 'Install the GitHub App',id: 'install-github-app'  },
+  { label: 'Your first PR analysis',id: 'first-analysis'      },
+  { label: 'Investigations',        id: 'investigations'      },
+  { label: 'Troubleshooting',       id: 'troubleshooting'     },
+];
 
-  const investigationEndpoints = [
-    {
-      method: 'POST', path: '/api/v1/investigations', auth: true,
-      desc: 'Create an investigation. user_id is extracted from the JWT token — do not pass it as a param.',
-      body: `POST /api/v1/investigations?connection_id=X&event_id=Y&failure_message=error+message\n# -> { "investigation_id": "507f...", "status": "PENDING" }`,
-    },
-    {
-      method: 'GET', path: '/api/v1/investigations/{id}/status', auth: true,
-      desc: 'Poll investigation progress. Returns FAILED if OpenMetadata is unreachable — expected in local dev.',
-      body: `# Response when complete:\n{\n  "investigation_id": "507f...",\n  "status": "COMPLETED",\n  "root_cause": {\n    "one_line_summary": "Column user_id renamed upstream",\n    "break_point_fqn": "raw.users",\n    "affected_assets": [...],\n    "suggested_fixes": [...],\n    "confidence": 0.92\n  }\n}`,
-    },
-    {
-      method: 'GET', path: '/api/v1/investigations/{id}', auth: true,
-      desc: 'Fetch a completed investigation with full lineage subgraph and root cause details.',
-      body: null,
-    },
-  ];
+// ── Page ──────────────────────────────────────────────────────────────────────
 
-  const chatEndpoints = [
-    {
-      method: 'POST', path: '/api/v1/chats', auth: true,
-      desc: 'Create a new chat session.',
-      body: `POST /api/v1/chats?title=Orders+Issue\n# -> { "session_id": "507f...", "title": "Orders Issue" }`,
-    },
-    {
-      method: 'POST', path: '/api/v1/chats/{id}/query', auth: true,
-      desc: 'Send a message. Follow-up questions (why, how, fix, impact, etc.) are answered from cached investigation data without re-traversing lineage.',
-      body: `{\n  "message": "Why is orders_daily failing?",\n  "asset_fqn": "snowflake.prod.orders_daily"\n}\n\n# Response:\n{\n  "session_id": "507f...",\n  "message": "Based on lineage analysis...",\n  "is_followup": false,\n  "investigation_id": "507f..."\n}`,
-    },
-    {
-      method: 'GET', path: '/api/v1/chats/{id}', auth: true,
-      desc: 'Fetch a session with full message history.',
-      body: null,
-    },
-  ];
-
+export default function DocsPage() {
   return (
     <div className="relative min-h-screen flex">
       <div className="absolute inset-0 bg-radial-subtle" />
 
       {/* Sidebar */}
       <aside className="hidden lg:block w-60 flex-shrink-0 sticky top-0 h-screen border-r border-glass-border overflow-y-auto pt-28 pb-10 px-6 relative z-10">
-        <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">On this page</p>
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Setup Guide</p>
         <nav className="space-y-0.5">
-          {navItems.map((item) => (
+          {NAV.map(({ label, id }) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase().replace(' ', '-')}`}
+              key={id}
+              href={`#${id}`}
               className="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-white/[0.04] transition-all"
             >
-              {item}
+              {label}
             </a>
           ))}
         </nav>
 
         <div className="mt-10 pt-6 border-t border-glass-border space-y-4">
           <div>
-            <p className="text-xs text-text-muted mb-2">Base URL</p>
-            <code className="text-xs text-accent font-mono block bg-accent/5 border border-accent/10 rounded-lg px-3 py-2 leading-relaxed">
-              http://localhost:8000<br />
-              <span className="text-text-muted">/api/v1</span>
-            </code>
+            <p className="text-xs text-text-muted mb-1.5">Platform</p>
+            <a href="https://fixflow.io" target="_blank" rel="noreferrer"
+              className="text-xs text-accent font-mono flex items-center gap-1 hover:underline">
+              fixflow.io <ArrowRight className="w-3 h-3" />
+            </a>
           </div>
           <div>
-            <p className="text-xs text-text-muted mb-2">Interactive docs</p>
-            <a href="http://localhost:8000/api/docs" target="_blank" rel="noreferrer"
+            <p className="text-xs text-text-muted mb-1.5">Status</p>
+            <a href="https://status.fixflow.io" target="_blank" rel="noreferrer"
               className="text-xs text-accent font-mono flex items-center gap-1 hover:underline">
-              /api/docs <ArrowRight className="w-3 h-3" />
+              status.fixflow.io <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
+          <div>
+            <p className="text-xs text-text-muted mb-1.5">Support</p>
+            <a href="mailto:support@fixflow.io"
+              className="text-xs text-accent font-mono flex items-center gap-1 hover:underline">
+              support@fixflow.io <ArrowRight className="w-3 h-3" />
             </a>
           </div>
         </div>
@@ -209,22 +140,24 @@ export default function Docs() {
       {/* Main */}
       <main className="flex-1 relative z-10 min-w-0">
 
-        {/* Header */}
+        {/* Hero */}
         <div className="px-8 sm:px-16 pt-28 sm:pt-32 pb-14 border-b border-glass-border">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="badge mb-6">
-              <BookOpen className="w-4 h-4" />
-              API Reference
+              <Cloud className="w-4 h-4" />
+              Getting started
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[0.95] mb-4">
-              <span className="text-gradient-white">Integration Guide</span>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-[0.95] mb-4">
+              <span className="text-gradient-white">Set up FixFlow</span>
             </h1>
-            <p className="text-lg text-text-secondary max-w-2xl">
-              Connect Pipeline Autopsy to your data stack — webhooks, investigations, chat sessions, and the GitHub PR bot.
+            <p className="text-lg text-text-secondary max-w-xl">
+              Connect your data sources, install the GitHub bot, and get automatic pipeline failure analysis — in about 10 minutes.
             </p>
             <div className="flex flex-wrap gap-2 mt-8">
-              {['FastAPI · Python 3.10+', 'MongoDB', 'OpenMetadata', 'Claude / GPT / Groq'].map((t) => (
-                <span key={t} className="text-xs font-mono text-text-muted border border-glass-border px-3 py-1.5 rounded-lg">{t}</span>
+              {['No coding required', '~10 min setup', 'Free to start'].map(t => (
+                <span key={t} className="text-xs text-text-muted border border-glass-border px-3 py-1.5 rounded-lg">
+                  {t}
+                </span>
               ))}
             </div>
           </motion.div>
@@ -232,252 +165,403 @@ export default function Docs() {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
 
-          {/* Installation */}
-          <Section id="installation" icon={Terminal} title="Installation" subtitle="Get the server running locally">
-            <div className="space-y-5">
-              <div className="grid sm:grid-cols-3 gap-3">
-                {[
-                  { n: '1', t: 'Install dependencies', s: 'conda + pip' },
-                  { n: '2', t: 'Configure .env', s: 'keys & DB URI' },
-                  { n: '3', t: 'Run server', s: 'localhost:8000' },
-                ].map((s) => (
-                  <div key={s.n} className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-glass-border">
-                    <span className="w-7 h-7 rounded-full bg-accent/15 text-accent text-xs font-black flex items-center justify-center flex-shrink-0">{s.n}</span>
-                    <div>
-                      <p className="font-semibold text-sm">{s.t}</p>
-                      <p className="text-text-muted text-xs">{s.s}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* ── Overview ──────────────────────────────────────────────────── */}
+          <Section id="overview" icon={Zap} title="How FixFlow works" subtitle="The big picture before you start">
+            <p className="text-sm text-text-secondary">
+              FixFlow watches your GitHub repositories for pull requests that touch SQL or data config files.
+              When it spots one, it traces the change through your data lineage to find which dashboards,
+              reports, and downstream tables will break — and posts the findings directly on the PR before
+              anyone has to review it manually.
+            </p>
 
-              <CodeBlock lang="bash" code={`# Python 3.14 on Windows — install numpy via conda first
-conda install numpy -y
-
-# Install remaining dependencies (binary wheels only)
-cd server
-pip install -r requirements.txt --only-binary=:all:`} />
-
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-glass-border text-xs text-text-secondary leading-relaxed">
-                <span className="text-text-primary font-semibold">Python 3.14 note — </span>
-                numpy, pydantic, and bcrypt have no pre-built wheels for Py3.14. Always install numpy via conda first, then use <code className="text-accent">--only-binary=:all:</code> for the rest. Plain <code className="text-accent">pip install -r requirements.txt</code> will fail to compile.
-              </div>
-
-              <CodeBlock lang="bash" code={`# Verify MongoDB is running
-mongosh --eval "db.adminCommand('ping')"
-
-# Start the server
-python app.py
-
-# Verify
-curl http://localhost:8000/health
-# { "status": "ok", "service": "ks-rag", "version": "1.0.0" }`} />
-            </div>
-          </Section>
-
-          {/* Authentication */}
-          <Section id="authentication" icon={Shield} title="Authentication" subtitle="JWT Bearer tokens — all protected routes require Authorization: Bearer <token>">
-            <div className="space-y-3 mb-6">
-              {authEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
-            </div>
-
-            <CodeBlock lang="bash" code={`# Register and get a token
-curl -X POST http://localhost:8000/api/v1/users/register \\
-  -H "Content-Type: application/json" \\
-  -d '{"email":"you@co.com","username":"you","password":"Testpass123"}'
-# -> { "access_token": "eyJ...", "token_type": "bearer" }
-
-# Use on every protected request
-curl -H "Authorization: Bearer eyJ..." \\
-  http://localhost:8000/api/v1/users/me`} />
-
-            <div className="mt-6 p-5 rounded-xl bg-white/[0.02] border border-glass-border">
-              <p className="text-sm font-semibold mb-1">Connections</p>
-              <p className="text-xs text-text-secondary mb-4">Before triggering any investigation, create a connection that stores your OpenMetadata credentials and optional GitHub repo. The connection_id is required on all webhook and investigation calls.</p>
-              <div className="space-y-2">
-                {connectionEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
-              </div>
-            </div>
-          </Section>
-
-          {/* Webhooks */}
-          <Section id="webhooks" icon={Server} title="Webhooks" subtitle="Three ways to trigger an investigation — all feed the same pipeline">
-            <div className="mb-6">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-text-muted mb-4">
-                <span className="px-2 py-1 bg-white/[0.03] border border-glass-border rounded">dbt webhook</span>
-                <ArrowRight className="w-3 h-3" />
-                <span className="px-2 py-1 bg-white/[0.03] border border-glass-border rounded">GitHub PR</span>
-                <ArrowRight className="w-3 h-3" />
-                <span className="px-2 py-1 bg-white/[0.03] border border-glass-border rounded">manual query</span>
-                <ArrowRight className="w-3 h-3" />
-                <span className="px-2 py-1 bg-accent/10 border border-accent/20 rounded text-accent">investigation pipeline</span>
-              </div>
-              <p className="text-sm text-text-secondary">The event router normalizes each format so your core logic runs once. All three return immediately — investigation runs asynchronously.</p>
-            </div>
             <div className="space-y-3">
-              {webhookEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
-            </div>
-          </Section>
-
-          {/* Investigations */}
-          <Section id="investigations" icon={Code} title="Investigations" subtitle="Create, poll, and retrieve AI-powered root cause analyses">
-            <div className="space-y-3 mb-6">
-              {investigationEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
-            </div>
-
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-glass-border mb-4">
-              <p className="text-xs font-semibold text-text-primary mb-3">Status lifecycle</p>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                {['PENDING', 'LINEAGE_TRAVERSAL', 'CONTEXT_BUILDING', 'AI_ANALYSIS', 'COMPLETED'].map((s, i, arr) => (
-                  <span key={s} className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded border ${s === 'COMPLETED' ? 'text-green-400 border-green-400/30 bg-green-400/5' : 'text-text-muted border-glass-border bg-white/[0.02]'}`}>{s}</span>
-                    {i < arr.length - 1 && <ArrowRight className="w-3 h-3 text-text-muted" />}
-                  </span>
-                ))}
-              </div>
-              <p className="text-xs text-text-muted mt-3">Returns FAILED if OpenMetadata is unreachable. Expected in local dev without a running OpenMetadata instance.</p>
-            </div>
-
-            <div className="p-5 rounded-xl bg-white/[0.02] border border-glass-border">
-              <p className="text-xs font-semibold text-text-primary mb-3">RootCause response shape</p>
-              <CodeBlock lang="json" code={`{
-  "one_line_summary": "Column user_id in raw.users was renamed to customer_id",
-  "detailed_explanation": "...",
-  "break_point_fqn": "raw.users",
-  "break_point_change": "Column renamed: user_id -> customer_id",
-  "affected_assets": [
-    { "fqn": "stg_users", "severity": "critical", "reason": "references old column" }
-  ],
-  "suggested_fixes": [
-    { "description": "Update stg_users.sql line 14", "code_snippet": "SELECT customer_id ..." }
-  ],
-  "owner_to_contact": "data-team@company.com",
-  "confidence": 0.92
-}`} />
-            </div>
-          </Section>
-
-          {/* Chat */}
-          <Section id="chat" icon={MessageSquare} title="Chat" subtitle="Multi-turn investigation sessions with automatic follow-up detection">
-            <div className="space-y-3 mb-5">
-              {chatEndpoints.map((ep, i) => <EndpointRow key={i} {...ep} />)}
-            </div>
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-glass-border text-xs text-text-secondary">
-              Follow-up detection is keyword-based. Messages containing "what", "why", "how", "fix", "impact" etc. are answered from cached investigation data without re-running lineage traversal — typically instant.
-            </div>
-          </Section>
-
-          {/* GitHub Bot */}
-          <Section id="github-bot" icon={GitBranch} title="GitHub Bot" subtitle="AI-generated impact analysis posted on PRs before merge">
-            <div className="space-y-5">
-              <p className="text-sm text-text-secondary">
-                When a PR modifies <code className="text-accent text-xs">.sql</code> or <code className="text-accent text-xs">.yml</code> files, Pipeline Autopsy posts an immediate placeholder comment, runs the full investigation in the background, then edits the comment with root cause, affected assets, and suggested fixes.
-              </p>
-
-              <div className="space-y-2">
-                {[
-                  'PR opened on GitHub',
-                  'Webhook fires to /api/v1/github/webhook (HMAC-validated)',
-                  'Diff parsed — .sql and .yml files extracted',
-                  '"Analysis started" comment posted to PR immediately',
-                  'Background: lineage traversal + AI analysis (~1350ms)',
-                  'PR comment edited with root cause, affected assets, suggested fixes',
-                ].map((step, i) => (
-                  <div key={i} className="flex items-start gap-3 text-xs text-text-secondary">
-                    <span className="w-5 h-5 rounded-full bg-white/[0.04] border border-glass-border text-text-muted font-mono text-xs flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-                    {step}
-                  </div>
-                ))}
-              </div>
-
-              <CodeBlock lang="bash" code={`# 1. Expose local server via ngrok
-ngrok http 8000
-# -> https://XXXX.ngrok-free.app
-
-# 2. Add webhook in GitHub repo Settings -> Webhooks:
-#    URL:    https://XXXX.ngrok-free.app/api/v1/github/webhook?connection_id=X&user_id=Y
-#    Events: Pull requests
-#    Secret: <value of GITHUB_WEBHOOK_SECRET in .env>
-
-# 3. Add your PAT (repo + workflow scopes) to .env:
-#    GITHUB_TEST_PAT=ghp_...`} />
-
-              <div className="rounded-xl overflow-hidden border border-glass-border bg-[#0d1117]">
-                <div className="flex items-center gap-2 px-5 py-3 bg-white/[0.02] border-b border-white/[0.06]">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
-                  <span className="ml-3 text-xs text-[#8b949e] font-mono">example PR comment</span>
-                </div>
-                <div className="p-6 font-mono text-xs leading-loose text-[#c9d1d9]">
-                  <p className="text-[#58a6ff] font-bold text-sm mb-3">Pipeline Autopsy — Analysis Complete</p>
-                  <p className="text-[#8b949e] mb-4">Schema change in <span className="text-[#79c0ff]">migrations/orders.sql</span></p>
-                  <p className="text-[#e6edf3] font-semibold mb-1">Root Cause</p>
-                  <p className="text-[#8b949e] mb-4 pl-3 border-l border-white/10">Column rename in upstream source propagated downstream, causing NULL values in dependent models.</p>
-                  <p className="text-[#e6edf3] font-semibold mb-2">Affected Assets</p>
-                  <p className="mb-1 pl-3">[CRITICAL] stg_orders — will break on next run</p>
-                  <p className="mb-4 pl-3">[HIGH]     revenue_dashboard — will show NULLs</p>
-                  <p className="text-[#e6edf3] font-semibold mb-1">Suggested Fix</p>
-                  <p className="text-[#8b949e] pl-3 border-l border-white/10 mb-4">Update column references in stg_orders.sql before merging.</p>
-                  <p className="text-[#8b949e]">Confidence: <span className="text-green-400">85%</span>  —  Owner: <span className="text-[#79c0ff]">data-team@company.com</span></p>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Configuration */}
-          <Section id="configuration" icon={Shield} title="Configuration" subtitle="All settings via server/.env">
-            <CodeBlock lang="env" code={`# DATABASE
-# Must be rag_database — controllers hardcode this name
-MONGO_URI=mongodb://localhost:27017/rag_database
-
-# AUTH
-SECRET_KEY=your-super-secret-key-change-in-production
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# OPENMETADATA
-OPENMETADATA_URL=http://localhost:8585
-OPENMETADATA_API_KEY=eyJ...
-
-# LLM — Claude preferred, falls back to OpenAI, then Groq
-CLAUDE_API_KEY=sk-ant-...
-OPENAI_API_KEY=sk-...
-GROQ_API_KEY=gsk_...
-DEFAULT_LLM_PROVIDER=claude
-AI_MODEL=claude-sonnet-4-20250514
-
-# GITHUB
-GITHUB_WEBHOOK_SECRET=your-webhook-secret
-GITHUB_TEST_PAT=ghp_...      # repo + workflow scopes
-
-# SERVER
-CORS_ORIGINS=["http://localhost:3000","http://localhost:5173"]
-APP_HOST=0.0.0.0
-APP_PORT=8000`} />
-
-            <div className="mt-5 grid sm:grid-cols-3 gap-3 text-xs">
               {[
-                { label: 'Never commit .env', sub: 'Added to .gitignore by default' },
-                { label: 'Rotate keys every 90 days', sub: 'Use AWS Secrets Manager in prod' },
-                { label: 'Validate before starting', sub: 'python check_env.py --full' },
-              ].map((tip) => (
-                <div key={tip.label} className="p-3 rounded-xl bg-white/[0.02] border border-glass-border">
-                  <p className="font-semibold text-text-primary">{tip.label}</p>
-                  <p className="text-text-muted mt-0.5">{tip.sub}</p>
+                { icon: GitBranch,   title: 'Developer opens a PR',           desc: 'Any pull request that edits SQL or YAML data files.' },
+                { icon: Zap,         title: 'FixFlow analyses the change',     desc: 'It traces the impact across your entire data lineage automatically.' },
+                { icon: MessageSquare, title: 'Comment posted to the PR',      desc: 'Root cause, affected assets, and a suggested fix — right in GitHub.' },
+                { icon: CheckCircle, title: 'Team merges with confidence',     desc: 'No surprises after merge. Issues caught before they reach production.' },
+              ].map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.02] border border-glass-border">
+                  <Icon className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-text-primary">{title}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
+
+            <Callout icon={CheckCircle} color="blue" title="What you'll need">
+              An OpenMetadata instance (cloud or self-hosted) with lineage set up for your tables, and a GitHub account with admin access to the repositories you want monitored.
+            </Callout>
           </Section>
 
-          {/* CTA */}
-          <div className="px-8 sm:px-16 py-16 text-center">
-            <h3 className="text-2xl font-bold mb-3">Ready to connect?</h3>
-            <p className="text-text-secondary text-sm mb-7 max-w-md mx-auto">
-              Point your dbt Cloud or GitHub webhook at a running instance and investigations start automatically.
+          {/* ── Create account ────────────────────────────────────────────── */}
+          <Section id="create-account" icon={LogIn} title="Create your account" subtitle="Sign up for free — no credit card needed">
+            <div className="space-y-4">
+              <Step n={1} title="Go to fixflow.io and click 'Start Free'">
+                <p>Use your work email — it makes it easier to share access with teammates later.</p>
+              </Step>
+              <Step n={2} title="Set a password">
+                <p>At least 8 characters with one uppercase letter and one number.</p>
+              </Step>
+              <Step n={3} title="Verify your email">
+                <p>Check your inbox for a verification link. It arrives within a minute. Check spam if you don't see it.</p>
+              </Step>
+              <Step n={4} title="You're in">
+                <p>You'll land on your dashboard. Your free account includes 50 investigations per month and one data connection.</p>
+              </Step>
+            </div>
+          </Section>
+
+          {/* ── Connect OpenMetadata ──────────────────────────────────────── */}
+          <Section id="connect-openmetadata" icon={Database} title="Connect OpenMetadata" subtitle="Give FixFlow read access to your data lineage">
+            <p className="text-sm text-text-secondary">
+              FixFlow uses your OpenMetadata instance to understand how your tables and columns are connected.
+              It only ever reads this data — it never writes to or modifies your OpenMetadata setup.
             </p>
-            <button className="btn-primary">
-              Request Early Access <ArrowRight className="w-4 h-4" />
-            </button>
+
+            <div className="space-y-4">
+              <Step n={1} title="Find your OpenMetadata URL">
+                <p>This is the web address you use to log in to OpenMetadata. It looks like:</p>
+                <div className="mt-2 space-y-1">
+                  <p className="font-mono text-xs text-accent bg-accent/5 border border-accent/10 rounded-lg px-3 py-2">https://your-org.openmetadata.cloud</p>
+                  <p className="text-xs text-text-muted">or your self-hosted address, e.g. <span className="font-mono text-accent">https://metadata.yourcompany.com</span></p>
+                </div>
+              </Step>
+
+              <Step n={2} title="Generate a bot token in OpenMetadata">
+                <p>FixFlow needs a special read-only token (called a "bot token") to talk to OpenMetadata on your behalf.</p>
+                <ol className="mt-3 space-y-2 list-none">
+                  {[
+                    'Log in to your OpenMetadata instance',
+                    'Click the gear icon (⚙️) in the top-right to open Settings',
+                    'In the left sidebar, click Integrations → Bots',
+                    'Click on "ingestion-bot" (it\'s created by default)',
+                    'Click "Show token" and copy the full token',
+                  ].map((s, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-text-secondary">
+                      <span className="w-4 h-4 rounded-full bg-white/5 border border-glass-border flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      {s}
+                    </li>
+                  ))}
+                </ol>
+
+                <Callout icon={CheckCircle} color="blue" title="Bot token vs your login token">
+                  Always use the bot token — not your personal login. Bot tokens never expire and work around the clock. Your personal session token expires after an hour.
+                </Callout>
+              </Step>
+
+              <Step n={3} title="Add the connection in FixFlow">
+                <ol className="space-y-2 list-none">
+                  {[
+                    'In your FixFlow dashboard, go to Settings → Data Sources',
+                    'Click "Add Connection" and select OpenMetadata',
+                    'Give it a name (e.g. "Production")',
+                    'Paste your OpenMetadata URL and bot token',
+                    'Click "Test Connection" — you should see a green checkmark',
+                    'Click Save',
+                  ].map((s, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-text-secondary">
+                      <span className="w-4 h-4 rounded-full bg-white/5 border border-glass-border flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      {s}
+                    </li>
+                  ))}
+                </ol>
+              </Step>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-glass-border text-xs space-y-2">
+              <p className="font-semibold text-text-primary">Connection status indicator</p>
+              <p className="text-text-secondary"><span className="text-emerald-400">●</span> <strong>Connected</strong> — everything is working</p>
+              <p className="text-text-secondary"><span className="text-amber-400">●</span> <strong>Pending</strong> — saved but not yet verified</p>
+              <p className="text-text-secondary"><span className="text-red-400">●</span> <strong>Failed</strong> — FixFlow can't reach your instance — see Troubleshooting</p>
+            </div>
+          </Section>
+
+          {/* ── Install GitHub App ────────────────────────────────────────── */}
+          <Section id="install-github-app" icon={GitBranch} title="Install the GitHub App" subtitle="Let FixFlow monitor pull requests in your repositories">
+            <p className="text-sm text-text-secondary">
+              FixFlow has an official GitHub App that you install directly from GitHub — similar to how you'd
+              install any other bot (like Dependabot or CodeClimate). You don't need to create tokens or
+              configure webhooks manually.
+            </p>
+
+            <div className="space-y-4">
+              <Step n={1} title="Start the installation from FixFlow">
+                <ol className="space-y-2 list-none">
+                  {[
+                    'In your FixFlow dashboard, go to Settings → Integrations',
+                    'Click on GitHub',
+                    'Click "Install GitHub App"',
+                    'You\'ll be redirected to GitHub',
+                  ].map((s, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-text-secondary">
+                      <span className="w-4 h-4 rounded-full bg-white/5 border border-glass-border flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      {s}
+                    </li>
+                  ))}
+                </ol>
+              </Step>
+
+              <Step n={2} title="Choose where to install it on GitHub">
+                <p>GitHub will ask you to pick an account or organisation. Choose the one that owns the repositories you want FixFlow to monitor.</p>
+
+                <Screenshot label="github.com — Install FixFlow">
+                  <div className="space-y-3 text-text-secondary">
+                    <p className="text-text-primary font-semibold text-sm">Install FixFlow</p>
+                    <p className="text-xs text-text-muted">Choose an account to install FixFlow on:</p>
+                    <div className="space-y-2">
+                      {['your-username', 'your-org'].map(acct => (
+                        <div key={acct} className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/[0.04] border border-glass-border/60">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-accent/20" />
+                            <span className="text-xs font-mono text-text-primary">{acct}</span>
+                          </div>
+                          <span className="text-xs text-accent">Install →</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Screenshot>
+              </Step>
+
+              <Step n={3} title="Select which repositories FixFlow can access">
+                <p>You'll be asked to choose between "All repositories" or specific ones. We recommend selecting only the repositories that contain your dbt or SQL data models.</p>
+
+                <Screenshot label="github.com — Repository access">
+                  <div className="space-y-3">
+                    <p className="text-xs text-text-muted">Repository access</p>
+                    <div className="space-y-2">
+                      {[
+                        { name: '○  All repositories',            sub: 'Includes future repositories' },
+                        { name: '●  Only select repositories',    sub: 'Recommended — choose specific repos' },
+                      ].map(r => (
+                        <div key={r.name} className="px-3 py-2.5 rounded-lg bg-white/[0.04] border border-glass-border/60">
+                          <p className="text-xs font-mono text-text-primary">{r.name}</p>
+                          <p className="text-xs text-text-muted mt-0.5">{r.sub}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Screenshot>
+              </Step>
+
+              <Step n={4} title="Approve the permissions">
+                <p>FixFlow requests read access to your code and pull requests, and write access to post comments on PRs. It does not have access to push code, merge PRs, or modify anything in your repository.</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Read pull requests',  allowed: true  },
+                    { label: 'Post PR comments',    allowed: true  },
+                    { label: 'Read repository code',allowed: true  },
+                    { label: 'Push or merge code',  allowed: false },
+                    { label: 'Access secrets',      allowed: false },
+                    { label: 'Modify settings',     allowed: false },
+                  ].map(({ label, allowed }) => (
+                    <div key={label} className="flex items-center gap-2 text-xs text-text-secondary">
+                      {allowed
+                        ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        : <span className="w-3.5 h-3.5 flex items-center justify-center text-red-400 flex-shrink-0">✕</span>
+                      }
+                      {label}
+                    </div>
+                  ))}
+                </div>
+              </Step>
+
+              <Step n={5} title="You're redirected back to FixFlow">
+                <p>Once you approve, GitHub sends you back to FixFlow. Your GitHub connection will show as <span className="text-emerald-400 font-semibold">Connected</span>. You're ready to go.</p>
+              </Step>
+            </div>
+
+            <Callout icon={AlertCircle} color="yellow" title="Need admin access?">
+              Installing a GitHub App requires admin access to the organisation or repository. If you don't have that, ask your GitHub org admin to complete this step — it only takes a minute.
+            </Callout>
+          </Section>
+
+          {/* ── First analysis ────────────────────────────────────────────── */}
+          <Section id="first-analysis" icon={Zap} title="Your first PR analysis" subtitle="What happens when a developer opens a pull request">
+            <p className="text-sm text-text-secondary">
+              Once the GitHub App is installed and your OpenMetadata connection is active, everything is automatic.
+              Here's what happens from the moment a PR is opened.
+            </p>
+
+            <div className="space-y-4">
+              <Step n={1} title="A developer opens a PR with SQL or config changes">
+                <p>FixFlow watches for pull requests that touch <Tag>.sql</Tag> or <Tag>.yml</Tag> files in the connected repositories. Other file types (Python, markdown, etc.) are ignored.</p>
+              </Step>
+
+              <Step n={2} title="FixFlow posts an initial comment within seconds">
+                <p>As soon as the PR opens, FixFlow posts a placeholder comment so the team knows analysis is running.</p>
+              </Step>
+
+              <Step n={3} title="Analysis completes and the comment updates">
+                <p>Usually within 2–5 seconds, the comment updates with the full findings:</p>
+              </Step>
+            </div>
+
+            <Screenshot label="github.com — Pull request #42">
+              <div className="space-y-4 font-mono text-xs leading-relaxed text-text-secondary">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-accent/20 flex-shrink-0" />
+                  <span className="text-text-muted">FixFlow Bot</span>
+                  <span className="text-text-muted/50">· just now</span>
+                </div>
+
+                <p className="text-accent font-bold text-sm">🔍 FixFlow — impact analysis complete</p>
+
+                <div className="space-y-1">
+                  <p className="text-text-primary font-semibold">What changed</p>
+                  <p>Column <span className="text-amber-400">user_id</span> renamed to <span className="text-amber-400">customer_id</span> in <span className="text-blue-400">models/orders.sql</span></p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-text-primary font-semibold">Root cause</p>
+                  <p className="text-text-muted pl-3 border-l border-glass-border">3 downstream tables reference the old column name and will break if this PR merges.</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-text-primary font-semibold">Affected tables</p>
+                  <p className="pl-3"><span className="text-red-400">CRITICAL</span>  stg_orders — 4 references to old column</p>
+                  <p className="pl-3"><span className="text-amber-400">HIGH</span>     fact_revenue — 2 references</p>
+                  <p className="pl-3"><span className="text-yellow-400">MEDIUM</span>   dim_customer — 1 reference</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-text-primary font-semibold">Suggested fix</p>
+                  <p className="text-text-muted pl-3 border-l border-glass-border">Update the column references in the 3 affected files before merging.</p>
+                </div>
+
+                <p className="text-text-muted pt-1">Confidence: <span className="text-blue-400">92%</span>  ·  Owner: <span className="text-blue-400">data-team@company.com</span></p>
+              </div>
+            </Screenshot>
+
+            <Callout icon={CheckCircle} color="green" title="Safe to merge?">
+              If FixFlow finds no downstream impact, the comment will say "No affected assets detected — safe to merge." You can use this as a green light in your review process.
+            </Callout>
+          </Section>
+
+          {/* ── Investigations ───────────────────────────────────────────── */}
+          <Section id="investigations" icon={MessageSquare} title="Investigations dashboard" subtitle="View and explore past analyses">
+            <p className="text-sm text-text-secondary">
+              Every PR analysis is saved as an investigation in your FixFlow dashboard. You can browse them,
+              filter by severity, and dig into the full lineage graph for any finding.
+            </p>
+
+            <div className="space-y-3">
+              {[
+                { title: 'Investigation list',     desc: 'See every analysis sorted by date. Filter by status (critical / passed / pending).' },
+                { title: 'Lineage graph',          desc: 'Click any investigation to see an interactive graph of how the change rippled through your data.' },
+                { title: 'Asset details',          desc: 'Click any affected table to see which columns are impacted and who owns them.' },
+                { title: 'Manual investigation',   desc: 'You can also start an investigation yourself — paste any asset name from OpenMetadata and ask FixFlow to analyse it.' },
+              ].map(({ title, desc }) => (
+                <div key={title} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-glass-border">
+                  <ChevronRight className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-text-primary">{title}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-glass-border">
+              <p className="text-xs font-semibold text-text-primary mb-3">Investigation lifecycle</p>
+              <div className="flex items-center gap-2 text-xs flex-wrap">
+                {['Received', 'Tracing lineage', 'AI analysis', 'Complete'].map((s, i, arr) => (
+                  <span key={s} className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full border border-glass-border text-text-muted bg-white/[0.02]">{s}</span>
+                    {i < arr.length - 1 && <ArrowRight className="w-3 h-3 text-text-muted/40" />}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-text-muted mt-3">Most investigations complete in 2–5 seconds.</p>
+            </div>
+          </Section>
+
+          {/* ── Troubleshooting ───────────────────────────────────────────── */}
+          <Section id="troubleshooting" icon={HelpCircle} title="Troubleshooting" subtitle="Something not working? Start here">
+
+            <div className="space-y-3">
+              {[
+                {
+                  title: 'FixFlow can\'t connect to OpenMetadata',
+                  steps: [
+                    'Check that your OpenMetadata instance is online and accessible',
+                    'Go to Settings → Data Sources and click "Test" next to your connection',
+                    'Make sure you used the bot token, not your personal login token',
+                    'If your OpenMetadata is self-hosted, check that FixFlow\'s IP is not blocked by a firewall',
+                  ],
+                },
+                {
+                  title: 'No PR comment is appearing',
+                  steps: [
+                    'Make sure the PR edits at least one .sql or .yml file — other file types are skipped',
+                    'Check that the GitHub App is still installed: go to github.com → Settings → Applications',
+                    'Verify the repository is one you selected during installation',
+                    'Check the FixFlow status page for any ongoing incidents',
+                  ],
+                },
+                {
+                  title: '"No lineage found" on an asset',
+                  steps: [
+                    'Open the asset in OpenMetadata and confirm it has lineage data attached',
+                    'If lineage is missing, you may need to run your dbt or ingestion pipeline in OpenMetadata first',
+                    'Check that you\'re using the exact asset name as it appears in OpenMetadata',
+                  ],
+                },
+                {
+                  title: 'GitHub App was accidentally uninstalled',
+                  steps: [
+                    'Go to github.com → your org → Settings → GitHub Apps',
+                    'Click "Install" next to FixFlow to re-install it',
+                    'Or go to Settings → Integrations in FixFlow and click "Reinstall GitHub App"',
+                  ],
+                },
+              ].map(({ title, steps }) => (
+                <div key={title} className="p-4 rounded-xl bg-white/[0.02] border border-glass-border">
+                  <p className="font-semibold text-text-primary text-sm mb-3 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    {title}
+                  </p>
+                  <ol className="space-y-1.5">
+                    {steps.map((s, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-text-secondary">
+                        <span className="text-text-muted/50 flex-shrink-0 w-3">{i + 1}.</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </div>
+
+            <Callout icon={MessageSquare} color="blue" title="Still stuck?">
+              <div className="space-y-1">
+                <p>Chat with us using the <strong>?</strong> button inside the dashboard.</p>
+                <p>Email us at <a href="mailto:support@fixflow.io" className="text-accent underline">support@fixflow.io</a> — we typically reply within a few hours.</p>
+              </div>
+            </Callout>
+          </Section>
+
+          {/* Footer CTA */}
+          <div className="px-8 sm:px-16 py-16 text-center">
+            <h3 className="text-2xl font-bold mb-3 text-text-primary">Ready to catch pipeline failures before they merge?</h3>
+            <p className="text-text-secondary text-sm mb-7 max-w-md mx-auto">
+              Free account, no credit card required. Takes about 10 minutes to set up from scratch.
+            </p>
+            <a
+              href="https://app.fixflow.io/signup"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent/90 transition-colors"
+            >
+              Start free <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
 
         </motion.div>
