@@ -163,7 +163,7 @@ export default function Pricing() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {PLANS.map((plan, i) => {
+          {PLANS.map((plan) => {
             const isFree = plan.name === 'Free';
             return (
               <motion.div
